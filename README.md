@@ -25,16 +25,16 @@ This solution is not working without a valid Google Maps API key so the first th
 
 2. Updating API key is done via configuration page in the solution that is shown in the image below.
 
-   ![solution_config](docs\solution_config.png)
+   ![solution_config](docs/solution_config.png)
 
 3. Then you need to assign security roles to the users that will manage/use Google Maps in CRM by assigning them CRM Google Maps Admin or CRM Google Maps User role.
 
-   ![roles](docs\roles.png)
+   ![roles](docs/roles.png)
 
 4. Then you need to add Google Maps web resource to the CRM form where you want to show the address on the map. You need to set one parameter (address) on the web resource in the Custom parameters textbox (eg. `address=address1_line1` or `address=address1_composite`)
 
-   ![webresource_config](docs\webresource_config.png)
+   ![webresource_config](docs/webresource_config.png)
 
 5. Now your web resource is ready to use if you followed steps above. The final result is shown in the picture below.
 
-   ![maps_example](docs\maps_example.png)
+   ![maps_example](docs/maps_example.png)
