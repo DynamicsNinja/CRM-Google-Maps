@@ -1,0 +1,41 @@
+﻿#top {
+    background-color: gainsboro;
+    height: 40px;
+    padding-right: 10px;
+}
+
+#TopTitle {
+    font-size: 20px;
+    line-height: 40px;
+    margin-left: 10px;
+}
+
+.Version {
+    margin-left: 10px;
+}
+
+body {
+    font-family: Segoe\000020UI,Tahoma,Arial;
+    font-size: 14px;
+    margin: 0;
+}
+
+.TopImage {
+    float: right;
+    margin-top: 5px;
+}
+
+label {
+    display: inline-block;
+    font-weight: bold;
+    width: 125px;
+    margin-left: 15px;
+}
+
+#content {
+    padding: 10px;
+}
+
+#updateBtn {
+    margin-left: 25px;
+}
