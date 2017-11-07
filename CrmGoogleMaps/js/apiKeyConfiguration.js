@@ -1,14 +1,14 @@
 ﻿function getStoredApiKey() {
     var req = new XMLHttpRequest();
     req.open("GET",
-        Xrm.Page.context.getClientUrl() + "/api/data/v8.2/fic_googlemapsconfigurations?$select=fic_apikey",
+        Xrm.Page.context.getClientUrl() + "/api/data/v8.2/fic_googlemapsconfigurations?$select=fic_apikey,fic_usegoogleaddress,fic_markericon",
         true);
     req.setRequestHeader("OData-MaxVersion", "4.0");
     req.setRequestHeader("OData-Version", "4.0");
     req.setRequestHeader("Accept", "application/json");
     req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
     req.setRequestHeader("Prefer", "odata.include-annotations=\"*\"");
-    req.onreadystatechange = function() {
+    req.onreadystatechange = function () {
         if (this.readyState === 4) {
             req.onreadystatechange = null;
             if (this.status === 200) {
@@ -18,6 +18,10 @@
                 } else {
                     var configId = results.value[0]["fic_apikey"];
                     $('#apikey').val(configId);
+                    var markerIcon = results.value[0]["fic_markericon"];
+                    $('#markerIcon').val(markerIcon);
+                    var useGoogleAddresses = results.value[0]["fic_usegoogleaddress"];
+                    $('#useGoogleAddresses').prop('checked', useGoogleAddresses);
                 }
             } else {
                 Xrm.Utility.alertDialog(this.statusText);
@@ -30,19 +34,23 @@
 function createKey(apiKey) {
     var entity = {};
     entity.fic_apikey = apiKey;
+    entity.fic_usegoogleaddress = $('#useGoogleAddresses').prop('checked');
+    entity.fic_markericon = $('#markerIcon').val();
     var req = new XMLHttpRequest();
     req.open("POST", Xrm.Page.context.getClientUrl() + "/api/data/v8.2/fic_googlemapsconfigurations", true);
     req.setRequestHeader("OData-MaxVersion", "4.0");
     req.setRequestHeader("OData-Version", "4.0");
     req.setRequestHeader("Accept", "application/json");
     req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-    req.onreadystatechange = function() {
+    req.onreadystatechange = function () {
         if (this.readyState === 4) {
             req.onreadystatechange = null;
             if (this.status === 204) {
-                $(".alert").text("Key has been created successfuly!");
+                $(".alert").text("Settings have been created successfuly!");
                 $(".alert").show();
-                setTimeout(function() { $(".alert").hide(); }, 3000);
+                setTimeout(function () {
+                    $(".alert").hide();
+                }, 3000);
             } else {
                 Xrm.Utility.alertDialog(this.statusText);
             }
@@ -54,7 +62,8 @@ function createKey(apiKey) {
 function updateKey(key, id) {
     var entity = {};
     entity.fic_apikey = key;
-
+    entity.fic_usegoogleaddress = $('#useGoogleAddresses').prop('checked');
+    entity.fic_markericon = $('#markerIcon').val();
     var req = new XMLHttpRequest();
     req.open("PATCH",
         Xrm.Page.context.getClientUrl() + "/api/data/v8.2/fic_googlemapsconfigurations(" + id + ")",
@@ -63,13 +72,15 @@ function updateKey(key, id) {
     req.setRequestHeader("OData-Version", "4.0");
     req.setRequestHeader("Accept", "application/json");
     req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-    req.onreadystatechange = function() {
+    req.onreadystatechange = function () {
         if (this.readyState === 4) {
             req.onreadystatechange = null;
             if (this.status === 204) {
-                $(".alert").text("Key has been updated successfuly!");
+                $(".alert").text("Settings have been updated successfuly!");
                 $(".alert").show();
-                setTimeout(function() { $(".alert").hide(); }, 3000);
+                setTimeout(function () {
+                    $(".alert").hide();
+                }, 3000);
             } else {
                 Xrm.Utility.alertDialog(this.statusText);
             }
@@ -85,7 +96,7 @@ function upsertKey(key) {
     req.setRequestHeader("OData-Version", "4.0");
     req.setRequestHeader("Accept", "application/json");
     req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-    req.onreadystatechange = function() {
+    req.onreadystatechange = function () {
         if (this.readyState === 4) {
             req.onreadystatechange = null;
             if (this.status === 200) {
@@ -106,8 +117,14 @@ function upsertKey(key) {
 
 getStoredApiKey();
 document.getElementById("update").addEventListener("click",
-    function() {
+    function () {
         var key = document.getElementById('apikey').value;
         upsertKey(key);
     },
     false);
+
+$("#markerIcon").change(function () {
+    markerPreview = $('#markerIcon').val();
+    $("#markerPreview").attr("src", markerPreview);
+    $("#markerPreview").show();
+});

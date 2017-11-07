@@ -1,5 +1,7 @@
 ﻿var lat = [];
 var lng = [];
+var useGoogleAddress = false;
+var markerIcon = "";
 var map;
 
 function initialize() {
@@ -58,7 +60,8 @@ function setMarker(address) {
                 var marker = new google.maps.Marker({
                     map: map,
                     position: results[0].geometry.location,
-                    title: results[0].formatted_address
+                    title: useGoogleAddress ? results[0].formatted_address : address,
+                    icon: markerIcon
                 });
                 google.maps.event.addListener(marker,
                     'click',
@@ -78,7 +81,7 @@ function setMarker(address) {
 function loadScript() {
     var req = new XMLHttpRequest();
     req.open("GET",
-        Xrm.Page.context.getClientUrl() + "/api/data/v8.2/fic_googlemapsconfigurations?$select=fic_apikey",
+        Xrm.Page.context.getClientUrl() + "/api/data/v8.2/fic_googlemapsconfigurations?$select=fic_apikey,fic_usegoogleaddress,fic_markericon",
         true);
     req.setRequestHeader("OData-MaxVersion", "4.0");
     req.setRequestHeader("OData-Version", "4.0");
@@ -92,6 +95,8 @@ function loadScript() {
                 var results = JSON.parse(this.response);
                 if (results.value.length == 0) return;
                 var apiKey = results.value[0]["fic_apikey"];
+                useGoogleAddress = results.value[0]["fic_usegoogleaddress"];
+                markerIcon = results.value[0]["fic_markericon"];
                 var script = document.createElement('script');
                 script.type = 'text/javascript';
                 script.src = 'https://maps.googleapis.com/maps/api/js?key=' + apiKey;
