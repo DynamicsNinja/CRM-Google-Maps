@@ -1,29 +1,68 @@
-﻿function initialize() {
+﻿var lat = [];
+var lng = [];
+var map;
+
+function initialize() {
     var p = GetParameters();
     var map_canvas = document.getElementById('map_canvas');
     var map_options = {
-        center: new google.maps.LatLng(-26.4420246, 133.281323),
-        zoom: 4,
         mapTypeId: google.maps.MapTypeId.ROADMAP
     }
-    var map = new google.maps.Map(map_canvas, map_options)
+    map = new google.maps.Map(map_canvas, map_options);
+    var addresses = p.address.split(',');
+    $.each(addresses, function (index, value) {
+        var addressString = generateAddressString(value);
+        setMarker(addressString);
+    });
+}
+
+function generateAddressString(field) {
+    var addressString = [];
+    if (field.indexOf('+') !== -1) {
+        var fields = field.split('+');
+        $.each(fields, function (index, value) {
+            var fieldValue = window.parent.Xrm.Page.data.entity.attributes.get(value).getValue();
+            if (fieldValue != null) {
+                addressString.push(fieldValue);
+            }
+        });
+        return addressString.join();
+    } else {
+        return window.parent.Xrm.Page.data.entity.attributes.get(field).getValue();;
+    }
+}
+
+function setCenterAndZoom() {
+    map.setCenter(new google.maps.LatLng(
+        ((Math.max.apply(Math, lat) + Math.min.apply(Math, lat)) / 2.0), ((Math.max.apply(Math, lng) + Math.min.apply(Math, lng)) / 2.0)));
+    map.fitBounds(new google.maps.LatLngBounds(
+        //bottom left
+        new google.maps.LatLng(Math.min.apply(Math, lat), Math.min.apply(Math, lng)),
+        //top right
+        new google.maps.LatLng(Math.max.apply(Math, lat), Math.max.apply(Math, lng))));
+}
+
+function setMarker(address) {
     var geocoder = new google.maps.Geocoder();
-    var address = window.parent.Xrm.Page.data.entity.attributes.get(p.address).getValue();
     geocoder.geocode({
-            'address': address
-        },
-        function(results, status) {
+        'address': address
+    },
+
+        function (results, status) {
             if (status == google.maps.GeocoderStatus.OK) {
+                lat.push(results[0].geometry.location.lat());
+                lng.push(results[0].geometry.location.lng());
                 map.setCenter(results[0].geometry.location);
                 map.setZoom(14);
+                setCenterAndZoom(map);
                 var marker = new google.maps.Marker({
                     map: map,
                     position: results[0].geometry.location,
-                    title: address
+                    title: results[0].formatted_address
                 });
                 google.maps.event.addListener(marker,
                     'click',
-                    function() {
+                    function () {
                         var infowindow = new google.maps.InfoWindow({
                             content: marker.title,
                             position: marker.position,
@@ -46,7 +85,7 @@ function loadScript() {
     req.setRequestHeader("Accept", "application/json");
     req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
     req.setRequestHeader("Prefer", "odata.include-annotations=\"*\"");
-    req.onreadystatechange = function() {
+    req.onreadystatechange = function () {
         if (this.readyState === 4) {
             req.onreadystatechange = null;
             if (this.status === 200) {
@@ -65,5 +104,4 @@ function loadScript() {
     };
     req.send();
 }
-
 loadScript();
