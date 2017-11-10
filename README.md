@@ -23,7 +23,7 @@ This solution is not working without a valid Google Maps API key so the first th
 
 1. The first step after you install your solution is to set your Google Maps API key, because maps will not work if there is no valid API key set in CRM.
 
-2. Updating API key is done via configuration page in the solution that is shown in the image below.
+2. Updating API key is done via configuration page in the solution that is shown in the image below. Advanced configuration is described in [Features Wiki page](https://github.com/DynamicsNinja/CRM-Google-Maps/wiki/Features).
 
    ![solution_config](docs/solution_config.png)
 
