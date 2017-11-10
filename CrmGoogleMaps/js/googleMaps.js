@@ -3,6 +3,8 @@ var lng = [];
 var useGoogleAddress = false;
 var markerIcon = "";
 var map;
+var addressProcessedCounter = 0;
+var addresses = [];
 
 function initialize() {
     var p = GetParameters();
@@ -11,7 +13,7 @@ function initialize() {
         mapTypeId: google.maps.MapTypeId.ROADMAP
     }
     map = new google.maps.Map(map_canvas, map_options);
-    var addresses = p.address.split(',');
+    addresses = p.address.split(',');
     $.each(addresses, function (index, value) {
         var addressString = generateAddressString(value);
         setMarker(addressString);
@@ -37,11 +39,16 @@ function generateAddressString(field) {
 function setCenterAndZoom() {
     map.setCenter(new google.maps.LatLng(
         ((Math.max.apply(Math, lat) + Math.min.apply(Math, lat)) / 2.0), ((Math.max.apply(Math, lng) + Math.min.apply(Math, lng)) / 2.0)));
-    map.fitBounds(new google.maps.LatLngBounds(
-        //bottom left
-        new google.maps.LatLng(Math.min.apply(Math, lat), Math.min.apply(Math, lng)),
-        //top right
-        new google.maps.LatLng(Math.max.apply(Math, lat), Math.max.apply(Math, lng))));
+    if (addresses.length == 1) {
+        map.setZoom(14);
+    } else {
+
+        map.fitBounds(new google.maps.LatLngBounds(
+            //bottom left
+            new google.maps.LatLng(Math.min.apply(Math, lat), Math.min.apply(Math, lng)),
+            //top right
+            new google.maps.LatLng(Math.max.apply(Math, lat), Math.max.apply(Math, lng))));
+    }
 }
 
 function setMarker(address) {
@@ -52,11 +59,13 @@ function setMarker(address) {
 
         function (results, status) {
             if (status == google.maps.GeocoderStatus.OK) {
+                addressProcessedCounter++;
                 lat.push(results[0].geometry.location.lat());
                 lng.push(results[0].geometry.location.lng());
-                map.setCenter(results[0].geometry.location);
-                map.setZoom(14);
-                setCenterAndZoom(map);
+
+                if (addressProcessedCounter == addresses.length) {
+                    setCenterAndZoom(map);
+                }
                 var marker = new google.maps.Marker({
                     map: map,
                     position: results[0].geometry.location,
