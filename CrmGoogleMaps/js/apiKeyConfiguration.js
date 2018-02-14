@@ -1,7 +1,7 @@
 ﻿function getStoredApiKey() {
     var req = new XMLHttpRequest();
     req.open("GET",
-        Xrm.Page.context.getClientUrl() + "/api/data/v8.2/fic_googlemapsconfigurations?$select=fic_apikey,fic_usegoogleaddress,fic_markericon",
+        Xrm.Page.context.getClientUrl() + "/api/data/v8.2/fic_googlemapsconfigurations?$select=fic_apikey,fic_usegoogleaddress,fic_markericon,fic_defaultzoom",
         true);
     req.setRequestHeader("OData-MaxVersion", "4.0");
     req.setRequestHeader("OData-Version", "4.0");
@@ -21,6 +21,8 @@
                     var markerIcon = results.value[0]["fic_markericon"];
                     $('#markerIcon').val(markerIcon);
                     var useGoogleAddresses = results.value[0]["fic_usegoogleaddress"];
+                    var defaultZoom = results.value[0]["fic_defaultzoom"];
+                    $('#defaultzoom').val(defaultZoom);
                     $('#useGoogleAddresses').prop('checked', useGoogleAddresses);
                 }
             } else {
@@ -36,6 +38,7 @@ function createKey(apiKey) {
     entity.fic_apikey = apiKey;
     entity.fic_usegoogleaddress = $('#useGoogleAddresses').prop('checked');
     entity.fic_markericon = $('#markerIcon').val();
+    entity.fic_defaultzoom = $('#defaultzoom').val();
     var req = new XMLHttpRequest();
     req.open("POST", Xrm.Page.context.getClientUrl() + "/api/data/v8.2/fic_googlemapsconfigurations", true);
     req.setRequestHeader("OData-MaxVersion", "4.0");
@@ -64,6 +67,7 @@ function updateKey(key, id) {
     entity.fic_apikey = key;
     entity.fic_usegoogleaddress = $('#useGoogleAddresses').prop('checked');
     entity.fic_markericon = $('#markerIcon').val();
+    entity.fic_defaultzoom = $('#defaultzoom').val();
     var req = new XMLHttpRequest();
     req.open("PATCH",
         Xrm.Page.context.getClientUrl() + "/api/data/v8.2/fic_googlemapsconfigurations(" + id + ")",
@@ -128,3 +132,26 @@ $("#markerIcon").change(function () {
     $("#markerPreview").attr("src", markerPreview);
     $("#markerPreview").show();
 });
+
+for (var i = 1; i <= 20; i++) {
+    switch (i) {
+        case 1:
+            $("#defaultzoom").append(new Option(i + " (World)", i));
+            break;
+        case 5:
+            $("#defaultzoom").append(new Option(i + " (Continent)", i));
+            break;
+        case 10:
+            $("#defaultzoom").append(new Option(i + " (City)", i));
+            break;
+        case 15:
+            $("#defaultzoom").append(new Option(i + " (Street)", i));
+            break;
+        case 20:
+            $("#defaultzoom").append(new Option(i + " (Building)", i));
+            break;
+        default:
+            $("#defaultzoom").append(new Option(i, i));
+    }
+}
+
