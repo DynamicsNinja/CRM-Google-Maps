@@ -1,25 +1,62 @@
-﻿var lat = [];
-var lng = [];
-var useGoogleAddress = false;
+﻿var useGoogleAddress = false;
 var markerIcon = "";
-var map;
-var addressProcessedCounter = 0;
-var addresses = [];
 var defaultZoom = null;
+var map;
+var addresses = [];
+var addressProcessedCounter = 0;
+var lat = [];
+var lng = [];
+var markers = [];
+
+function RefreshButton(topLeftDiv) {
+    var imageUI = document.createElement('img');
+    imageUI.style.height = '20px';
+    imageUI.style.width = '20px';
+    imageUI.src = '../img/refresh.svg';
+    imageUI.style.backgroundColor = '#fff';
+    imageUI.style.border = '2px solid #fff';
+    imageUI.style.borderRadius = '3px';
+    imageUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
+    imageUI.style.cursor = 'pointer';
+    topLeftDiv.appendChild(imageUI);
+
+    topLeftDiv.addEventListener('click', function () {
+        initialize();
+    });
+}
 
 function initialize() {
     var p = GetParameters();
     var map_canvas = document.getElementById('map_canvas');
     var map_options = {
-        mapTypeId: google.maps.MapTypeId.ROADMAP
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        mapTypeControl: false
     }
-    map = new google.maps.Map(map_canvas, map_options);
+    map = map || new google.maps.Map(map_canvas, map_options);
+
+    var topLeftControl = document.createElement('div');
+    topLeftControl.style.margin = '10px 14px';
+    var centerControl = new RefreshButton(topLeftControl);
+
+    topLeftControl.index = 1;
+    if (map.controls[google.maps.ControlPosition.TOP_LEFT].length == 0) {
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(topLeftControl);
+    }
+
+    for (var i = 0; i < markers.length; i++) {
+        markers[i].setMap(null);
+    }
+    addressProcessedCounter = 0;
+    lat = [];
+    lng = [];
+    markers = [];
     addresses = p.address.split(',');
     if (p.zoom != undefined) { defaultZoom = parseInt(p.zoom); }
     $.each(addresses, function (index, value) {
         var addressString = generateAddressString(value);
-        setMarker(addressString);
+        setMarker(addressString)
     });
+
 }
 
 function generateAddressString(field) {
@@ -41,7 +78,7 @@ function generateAddressString(field) {
 function setCenterAndZoom() {
     map.setCenter(new google.maps.LatLng(
         ((Math.max.apply(Math, lat) + Math.min.apply(Math, lat)) / 2.0), ((Math.max.apply(Math, lng) + Math.min.apply(Math, lng)) / 2.0)));
-    if (addresses.length == 1) {
+    if (markers.length == 1) {
         map.setZoom(defaultZoom);
     } else {
         map.fitBounds(new google.maps.LatLngBounds(
@@ -59,21 +96,18 @@ function setMarker(address) {
     },
 
         function (results, status) {
+            addressProcessedCounter++;
             if (status == google.maps.GeocoderStatus.OK) {
-                $("#map_canvas").show();
-                addressProcessedCounter++;
                 lat.push(results[0].geometry.location.lat());
                 lng.push(results[0].geometry.location.lng());
 
-                if (addressProcessedCounter == addresses.length) {
-                    setCenterAndZoom(map);
-                }
                 var marker = new google.maps.Marker({
                     map: map,
                     position: results[0].geometry.location,
                     title: useGoogleAddress ? results[0].formatted_address : address,
                     icon: markerIcon
                 });
+                markers.push(marker);
                 google.maps.event.addListener(marker,
                     'click',
                     function () {
@@ -84,9 +118,16 @@ function setMarker(address) {
                         infowindow.open(map);
                     });
             } else if (status == google.maps.GeocoderStatus.ZERO_RESULTS) {
-                $("#no_results").show();
             } else {
-                alert("Geocode was not successful for the following reason: " + status);
+                console.log("Geocode was not successful for the following reason: " + status);
+            }
+            if (addressProcessedCounter == addresses.length) {
+                if (markers.length != 0) {
+                    $("#map_canvas").show();
+                    setCenterAndZoom(map);
+                } else {
+                    $("#no_results").show();
+                }
             }
         });
 }
