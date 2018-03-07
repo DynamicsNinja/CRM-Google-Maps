@@ -1,7 +1,7 @@
 ﻿function getStoredApiKey() {
     var req = new XMLHttpRequest();
     req.open("GET",
-        Xrm.Page.context.getClientUrl() + "/api/data/v8.2/fic_googlemapsconfigurations?$select=fic_apikey,fic_usegoogleaddress,fic_markericon,fic_defaultzoom",
+        Xrm.Page.context.getClientUrl() + "/api/data/v" + VERSION + "/fic_googlemapsconfigurations?$select=fic_apikey,fic_usegoogleaddress,fic_markericon,fic_defaultzoom",
         true);
     req.setRequestHeader("OData-MaxVersion", "4.0");
     req.setRequestHeader("OData-Version", "4.0");
@@ -40,7 +40,7 @@ function createKey(apiKey) {
     entity.fic_markericon = $('#markerIcon').val();
     entity.fic_defaultzoom = $('#defaultzoom').val();
     var req = new XMLHttpRequest();
-    req.open("POST", Xrm.Page.context.getClientUrl() + "/api/data/v8.2/fic_googlemapsconfigurations", true);
+    req.open("POST", Xrm.Page.context.getClientUrl() + "/api/data/v" + VERSION + "/fic_googlemapsconfigurations", true);
     req.setRequestHeader("OData-MaxVersion", "4.0");
     req.setRequestHeader("OData-Version", "4.0");
     req.setRequestHeader("Accept", "application/json");
@@ -70,7 +70,7 @@ function updateKey(key, id) {
     entity.fic_defaultzoom = $('#defaultzoom').val();
     var req = new XMLHttpRequest();
     req.open("PATCH",
-        Xrm.Page.context.getClientUrl() + "/api/data/v8.2/fic_googlemapsconfigurations(" + id + ")",
+        Xrm.Page.context.getClientUrl() + "/api/data/v" + VERSION + "/fic_googlemapsconfigurations(" + id + ")",
         true);
     req.setRequestHeader("OData-MaxVersion", "4.0");
     req.setRequestHeader("OData-Version", "4.0");
@@ -95,7 +95,7 @@ function updateKey(key, id) {
 
 function upsertKey(key) {
     var req = new XMLHttpRequest();
-    req.open("GET", Xrm.Page.context.getClientUrl() + "/api/data/v8.2/fic_googlemapsconfigurations", true);
+    req.open("GET", Xrm.Page.context.getClientUrl() + "/api/data/v" + VERSION + "/fic_googlemapsconfigurations", true);
     req.setRequestHeader("OData-MaxVersion", "4.0");
     req.setRequestHeader("OData-Version", "4.0");
     req.setRequestHeader("Accept", "application/json");
@@ -119,6 +119,7 @@ function upsertKey(key) {
     req.send();
 }
 
+var VERSION = parent.Xrm.Page.context.getVersion() != "" ? parent.Xrm.Page.context.getVersion().substring(0, 3) : "8.0";
 getStoredApiKey();
 document.getElementById("update").addEventListener("click",
     function () {
@@ -154,4 +155,3 @@ for (var i = 1; i <= 20; i++) {
             $("#defaultzoom").append(new Option(i, i));
     }
 }
-
